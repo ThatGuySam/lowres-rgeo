@@ -1,12 +1,16 @@
-var fs     = require("fs"),
-    path   = require("path"),
-    zlib   = require("zlib"),
-    WIDTH  = 256,
+import fs from 'node:fs'
+import path from 'node:path'
+import zlib from 'node:zlib'
+
+// var fs     = require("fs"),
+//     path   = require("path"),
+//     zlib   = require("zlib"),
+const WIDTH  = 256,
     HEIGHT = 128,
     RADIUS = 6371009,
     RADS   = Math.PI / 180;
 
-function vincentyDistance(lat1, lon1, lat2, lon2) {
+function vincentyDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   lat1 *= RADS;
   lon1 *= RADS;
   lat2 *= RADS;
@@ -28,11 +32,13 @@ function vincentyDistance(lat1, lon1, lat2, lon2) {
   );
 }
 
-function pathFor(x, y) {
+function pathFor(x: number, y: number) {
   return path.join(__dirname, "data", x.toString(), y.toString() + ".json.gz");
 }
 
-function readPath(pathname, callback) {
+type CallbackFunction<T = any> = (err: Error | null, data?: T) => void
+
+function readPath(pathname: string, callback: CallbackFunction) {
   return fs.readFile(pathname, function(err, data) {
     if(err) {
       if(err.code === "ENOENT")
@@ -49,7 +55,7 @@ function readPath(pathname, callback) {
         data = JSON.parse(data.toString("utf8"));
       }
 
-      catch(err) {
+      catch(err: any) {
         return callback(err);
       }
 
@@ -58,12 +64,12 @@ function readPath(pathname, callback) {
   });
 }
 
-function readPaths(pathnames, callback) {
+function readPaths(pathnames: string[], callback: CallbackFunction) {
   var i = pathnames.length,
       todo = i,
-      list = [];
+      list: string[] = [];
 
-  function join(err, data) {
+  function join(err: Error | null, data: string[]) {
     if(!todo)
       return;
 
@@ -85,8 +91,8 @@ function readPaths(pathnames, callback) {
     readPath(pathnames[i], join);
 }
 
-module.exports = function(lat, lon, callback) {
-  var u = ((lon + 180) * WIDTH / 360) % WIDTH,
+module.exports = function(lat: number, lon: number, callback: CallbackFunction) {
+  let u = ((lon + 180) * WIDTH / 360) % WIDTH,
       v = ((90 - lat) * HEIGHT / 180) % HEIGHT,
       x = Math.floor(u),
       y = Math.floor(v);
@@ -96,10 +102,10 @@ module.exports = function(lat, lon, callback) {
   v = v - y < 0.5 ? (y === 0 ? HEIGHT : y) - 1 :
                     (y + 1 === HEIGHT ? 0 : y + 1);
 
-  x = x.toString();
-  y = y.toString();
-  u = u.toString();
-  v = v.toString();
+  x = Number(x.toString());
+  y = Number(y.toString());
+  u = Number(u.toString());
+  v = Number(v.toString());
 
   return readPaths(
     [pathFor(x, y), pathFor(u, y), pathFor(x, v), pathFor(u, v)],
