@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "nodenext",
+        "strict": true,
+        "baseUrl": ".",
+        "paths": {
+            "~/*": ["./*"]
+        },
+        "types": [
+            "webpack-env",
+            "node"
+        ]
+    },
+    "exclude": ["node_modules", "*.config.js"]
+}
